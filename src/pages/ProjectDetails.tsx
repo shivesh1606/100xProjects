@@ -11,7 +11,7 @@ type ProjectFile = {
 };
 
 type Project = {
-  id: number;
+  id: string; // was number
   title: string;
   description: string;
   mediumUrl: string;

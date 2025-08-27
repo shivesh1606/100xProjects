@@ -9,7 +9,7 @@ type ProjectFile = {
 };
 
 type Project = {
-  id?: string;
+  id?: string; // was number
   title: string;
   description: string;
   mediumUrl: string;
@@ -39,7 +39,7 @@ const UpdateProjectForm: React.FC<UpdateProjectFormProps> = ({ project, onUpdate
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await updateProject(form.id, form);
+      await updateProject(form.id ?? '', form); // ensure string
       setIsSubmitting(false);
       if (onUpdated) onUpdated();
       else navigate('/projects');

@@ -89,6 +89,21 @@ const PublicProjectDetails: React.FC = () => {
   return <ProjectDetails project={project} />;
 };
 
+const ProjectDetailsWrapper: React.FC = () => {
+  const { projectId } = useParams();
+  const [project, setProject] = useState<any>(null);
+
+  useEffect(() => {
+    getProjects().then((projects) => {
+      const found = projects.find((p: any) => p.id === projectId);
+      setProject(found);
+    });
+  }, [projectId]);
+
+  if (!project) return <div className="text-center py-10">Project not found!</div>;
+  return <ProjectDetails project={project} />;
+};
+
 const App = () => {
   const { user } = useAuth();
 
@@ -109,7 +124,7 @@ const App = () => {
                 <Route path="/projects" element={<ProjectsPage />} />
                 <Route path="/projects/:projectId" element={
                   user
-                    ? <ProjectDetails />
+                    ? <ProjectDetailsWrapper />
                     : <PublicProjectDetails />
                 } />
                 <Route path="/projects/:projectId/edit" element={

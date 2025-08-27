@@ -4,7 +4,7 @@ import { EditIcon } from './Icons';
 import { useAuth } from '../contexts/AuthContext';
 
 type Project = {
-  id: number;
+  id: string; // was number
   title: string;
   description: string;
   author?: string;
