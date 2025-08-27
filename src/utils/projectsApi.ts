@@ -1,26 +1,22 @@
 const BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/projects`;
 
-function getAuthHeader() {
+function getAuthHeader(): Record<string, string> {
   const token = localStorage.getItem('jwt_token');
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 export const getProjects = async () => {
   const res = await fetch(BASE_URL, {
-    headers: { ...getAuthHeader() }
+    headers: getAuthHeader()
   });
   if (!res.ok) throw new Error('Failed to fetch projects');
   return await res.json();
 };
 
 export const addProject = async (project: any) => {
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-    ...getAuthHeader()
-  };
   const res = await fetch(BASE_URL, {
     method: 'POST',
-    headers,
+    headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
     body: JSON.stringify(project),
   });
   if (!res.ok) throw new Error('Failed to add project');

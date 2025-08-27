@@ -10,7 +10,7 @@ type ProjectFile = {
 };
 
 type Project = {
-  id?: number;
+  id?: string; // was number
   title: string;
   description: string;
   mediumUrl: string;
@@ -36,12 +36,18 @@ const ProjectForm: React.FC = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type, checked } = e.target;
-    setProject((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (checked ? 'public' : 'private') : value
-    }));
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value, type } = e.target;
+    if (type === 'checkbox') {
+      setProject((prev) => ({
+        ...prev,
+        [name]: (e.target as HTMLInputElement).checked ? 'public' : 'private'
+      }));
+    } else {
+      setProject((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,11 +89,29 @@ const ProjectForm: React.FC = () => {
         </div>
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-          <textarea name="description" id="description" value={project.description} onChange={handleChange} placeholder="A detailed description of your project." required rows="4" className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></textarea>
+          <textarea
+            name="description"
+            id="description"
+            value={project.description}
+            onChange={handleChange}
+            placeholder="A detailed description of your project."
+            required
+            rows={4}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+          ></textarea>
         </div>
         <div>
           <label htmlFor="executiveSummary" className="block text-sm font-medium text-gray-700 mb-1">Executive Summary</label>
-          <textarea name="executiveSummary" id="executiveSummary" value={project.executiveSummary} onChange={handleChange} placeholder="A short and concise summary." required rows="2" className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></textarea>
+          <textarea
+            name="executiveSummary"
+            id="executiveSummary"
+            value={project.executiveSummary}
+            onChange={handleChange}
+            placeholder="A short and concise summary."
+            required
+            rows={2}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+          ></textarea>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
