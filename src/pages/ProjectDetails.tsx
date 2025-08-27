@@ -1,34 +1,87 @@
+// --- Page: ProjectDetails (Normally in src/pages/ProjectDetails.tsx) ---
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { ExternalLinkIcon } from '../components/Icons';
 import { getProjects } from '../utils/localStorage';
 
-const ProjectDetails = () => {
+type ProjectFile = {
+  name: string;
+  url: string;
+  type: string;
+};
+
+type Project = {
+  id: number;
+  title: string;
+  description: string;
+  mediumUrl: string;
+  executiveSummary: string;
+  liveDemoUrl: string;
+  files: ProjectFile[];
+  author?: string;
+};
+
+const ProjectDetails: React.FC = () => {
   const { projectId } = useParams();
-  const projects = getProjects();
-  const project = projects.find((p) => p.id === parseInt(projectId));
+  const [project, setProject] = useState<Project | null>(null);
+
+  useEffect(() => {
+      const projects = getProjects();
+      const foundProject = projects.find((p) => p.id.toString() === projectId);
+      setProject(foundProject);
+  }, [projectId]);
+
 
   if (!project) {
-    return <div>Project not found!</div>;
+    return <div className="text-center py-10">Project not found!</div>;
   }
 
   return (
-    <div>
-      <h2>{project.title}</h2>
-      <p><strong>Description:</strong> {project.description}</p>
-      <p><strong>Executive Summary:</strong> {project.executiveSummary}</p>
-      <p><strong>Medium Article:</strong> <a href={project.mediumUrl}>{project.mediumUrl}</a></p>
-      <p><strong>Live Demo:</strong> <a href={project.liveDemoUrl}>{project.liveDemoUrl}</a></p>
-      <div>
-        <h3>Media Previews:</h3>
-        {project.files.map((file, index) => (
-          <div key={index}>
-            {file.type.startsWith('image') ? (
-              <img src={file.url} alt={file.name} style={{ maxWidth: '100%', height: 'auto' }} />
-            ) : (
-              <p>📄 <a href={file.url} target="_blank" rel="noopener noreferrer">{file.name}</a></p>
-            )}
+    <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-xl overflow-hidden px-2 sm:px-6">
+        <div className="p-4 sm:p-8 md:p-12">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">{project.title}</h1>
+            <p className="text-base sm:text-lg text-gray-600 mb-6">by <span className="font-semibold">{project.author || 'Anonymous'}</span></p>
+
+            <div className="prose prose-lg max-w-none">
+                <h2 className="text-2xl font-bold text-gray-800 mt-8 mb-3">Description</h2>
+                <p>{project.description}</p>
+
+                <h2 className="text-2xl font-bold text-gray-800 mt-8 mb-3">Executive Summary</h2>
+                <p>{project.executiveSummary}</p>
+            </div>
+
+            <div className="mt-10 flex flex-wrap gap-4">
+                {project.mediumUrl && (
+                    <a href={project.mediumUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gray-800 hover:bg-gray-900">
+                        Read on Medium <ExternalLinkIcon />
+                    </a>
+                )}
+                {project.liveDemoUrl && (
+                    <a href={project.liveDemoUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                        Live Demo <ExternalLinkIcon />
+                    </a>
+                )}
+            </div>
+        </div>
+
+      {project.files && project.files.length > 0 && (
+        <div className="bg-gray-50 p-4 sm:p-8 md:p-12">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6">Media Gallery</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {project.files.map((file, index) => (
+              <div key={index} className="rounded-lg overflow-hidden border">
+                {(file.type && file.type.startsWith('image')) ? (
+                  <img src={file.url} alt={file.name} className="w-full h-32 sm:h-48 object-cover" />
+                ) : (
+                  <div className="w-full h-32 sm:h-48 bg-gray-200 flex items-center justify-center p-4">
+                    <a href={file.url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-blue-600 hover:underline text-center">{file.name}</a>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
