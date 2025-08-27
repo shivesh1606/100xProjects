@@ -2,28 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ProjectCard from '../components/ProjectCard';
 import { PlusIcon } from '../components/Icons';
-import { getProjects } from '../utils/localStorage';
-
-type Project = {
-  id: number;
-  title: string;
-  description: string;
-  author?: string;
-  // ...other fields as needed...
-};
+import { getProjects, getPublicProjects } from '../utils/projectsApi';
+import { useAuth } from '../contexts/AuthContext';
 
 // --- Page: ProjectsPage (Normally in src/pages/ProjectsPage.tsx) ---
 const ProjectsPage: React.FC = () => {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     setLoading(true);
-    setTimeout(() => {
-        setProjects(getProjects());
-        setLoading(false);
-    }, 500);
-  }, []);
+    const fetchFn = user ? getProjects : getPublicProjects;
+    fetchFn().then((data) => {
+      setProjects(data);
+      setLoading(false);
+    });
+  }, [user]);
 
   if (loading) {
       return <div className="text-center py-10">Loading projects...</div>
@@ -34,7 +29,7 @@ const ProjectsPage: React.FC = () => {
       <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-8">All Projects</h1>
       {projects.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {projects.map((project: Project) => (
+          {projects.map((project) => (
             <ProjectCard key={project.id} project={project} />
           ))}
         </div>
@@ -50,5 +45,6 @@ const ProjectsPage: React.FC = () => {
     </div>
   );
 };
+
 
 export default ProjectsPage;

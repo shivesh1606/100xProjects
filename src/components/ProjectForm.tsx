@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getProjects, saveProjects } from '../utils/localStorage';
+import { addProject } from '../utils/projectsApi';
+import { useAuth } from '../contexts/AuthContext';
 
 type ProjectFile = {
   name: string;
@@ -17,11 +18,13 @@ type Project = {
   liveDemoUrl: string;
   files: ProjectFile[];
   author?: string;
+  visibility?: 'public' | 'private';
 };
 
 // --- Component: ProjectForm (Normally in src/components/ProjectForm.tsx) ---
 const ProjectForm: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [project, setProject] = useState<Project>({
     title: '',
     description: '',
@@ -29,12 +32,16 @@ const ProjectForm: React.FC = () => {
     executiveSummary: '',
     liveDemoUrl: '',
     files: [],
+    visibility: 'public',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setProject((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setProject((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? (checked ? 'public' : 'private') : value
+    }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,16 +60,17 @@ const ProjectForm: React.FC = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
-      const existingProjects = getProjects();
-      const newProject = { id: Date.now(), ...project, author: "Anonymous" };
-      saveProjects([...existingProjects, newProject]);
+    try {
+      await addProject({ ...project, author: user || "Anonymous" });
       setIsSubmitting(false);
       navigate('/projects');
-    }, 1000);
+    } catch (error) {
+      setIsSubmitting(false);
+      alert('Error submitting project');
+    }
   };
 
   return (
@@ -126,7 +134,18 @@ const ProjectForm: React.FC = () => {
             </div>
           </div>
         )}
-
+        <div>
+          <label className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              name="visibility"
+              checked={project.visibility === 'public'}
+              onChange={handleChange}
+              className="form-checkbox h-4 w-4 text-blue-600"
+            />
+            <span className="text-sm text-gray-700">Public (uncheck for Private)</span>
+          </label>
+        </div>
         <button type="submit" disabled={isSubmitting} className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-300 transition-colors">
           {isSubmitting ? 'Submitting...' : 'Submit Project'}
         </button>
